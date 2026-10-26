@@ -27,3 +27,11 @@ def paragraph_to_vector(paragraph, global_vocab):
             vector[index] += 1
 
     return vector
+
+def create_document_matrix(all_paragraphs, global_vocab):
+    matrix = []
+    for paragraph in all_paragraphs:
+        vector = paragraph_to_vector(paragraph, global_vocab)
+        matrix.append(vector)
+
+    return matrix
