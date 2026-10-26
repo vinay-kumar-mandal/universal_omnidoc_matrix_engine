@@ -3,7 +3,7 @@ from core.parser import stream_any_document
 from core.vectorizer import clean_text_to_words, paragraph_to_vector, cosine_similarity
 
 def main():
-    file_path = "path/to/your/document.pdf"  # Replace with your document path
+    file_path = "datasets/test.docx"  # Replace with your document path
 
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
@@ -42,4 +42,38 @@ def main():
 
     print(f"Document matrix created with {len(document_matrix)} chunks.")
     print("=" * 60)
-    
+
+    print("\n[step 3/3] Searching for a query...")
+    print("(type 'exit' to quit the engine)")
+
+    while True:
+        query = input("\nEnter your search query: ").strip()
+        if not query:
+            continue
+        if query.lower() == "exit":
+            print("Exiting the search engine. Goodbye!")
+            break
+
+        query_vector = paragraph_to_vector(query, global_vocab)
+        best_match_idx = -1
+        highest_score = -1
+
+        for idx, doc_vector in enumerate(document_matrix):
+            sim_score = cosine_similarity(query_vector, doc_vector)
+
+            if sim_score > highest_score:
+                highest_score = sim_score
+                best_match_idx = idx
+
+        if highest_score > 0.5:
+            matched_chunk = all_chunks[best_match_idx]
+            
+            print(f"Location: {matched_chunk['location']} (similarity score: {highest_score:.4f})")
+            print("-" * 50)
+            print(matched_chunk["text"])
+            print("-" * 50)
+        else:
+            print("No relevant matches found for your query.")
+
+    if __name__ == "__main__":
+        main()
