@@ -2,11 +2,10 @@ import os
 import math
 
 def clean_text_to_words(text):
-
     word = text.split()
-
-    cleaned_words = [w.strip(".,!?\"'()[]:;") for w in word]
+    cleaned_words = [w.strip(".,!?\"'()[]:;").lower() for w in word]
     return cleaned_words
+
 
 def compute_idf(all_chunks, global_vocab):
     """
@@ -56,7 +55,7 @@ def cosine_similarity(vec1, vec2):
     mag1 = get_magnitude(vec1)
     mag2 = get_magnitude(vec2)
 
-    if mag1 * mag2 == 0:
+    if mag1 * mag2 > 0:
         return dot_product / (mag1 * mag2)
     return 0.0
 

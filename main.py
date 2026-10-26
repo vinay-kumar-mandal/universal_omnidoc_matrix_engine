@@ -1,6 +1,6 @@
 import os
 from core.parser import stream_any_document
-from core.vectorizer import clean_text_to_words, paragraph_to_vector, cosine_similarity
+from core.vectorizer import clean_text_to_words, compute_idf, paragraph_to_tfidf_vector, cosine_similarity
 
 def main():
     file_path = "datasets/test.docx"  # Replace with your document path
@@ -29,6 +29,7 @@ def main():
     global_vocab = sorted(list(global_vocab_set))
     print(f"Global vocabulary size: {len(global_vocab)} words")
 
+    idf_dict = compute_idf(all_chunks, global_vocab)
     if not all_chunks:
         print("⚠ No valid chunks found in the document.")
         return
@@ -37,7 +38,7 @@ def main():
     document_matrix = []
 
     for chunk in all_chunks:
-        vec = paragraph_to_vector(chunk["text"], global_vocab)
+        vec = paragraph_to_tfidf_vector(chunk["text"], global_vocab, idf_dict)
         document_matrix.append(vec)
 
     print(f"Document matrix created with {len(document_matrix)} chunks.")
@@ -54,7 +55,7 @@ def main():
             print("Exiting the search engine. Goodbye!")
             break
 
-        query_vector = paragraph_to_vector(query, global_vocab)
+        query_vector = paragraph_to_tfidf_vector(query, global_vocab, idf_dict)
         best_match_idx = -1
         highest_score = -1.0
 
