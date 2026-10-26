@@ -19,7 +19,7 @@ def main():
 
     try:
         for chunk, location in stream_any_document(file_path):
-            words = clean_text_to_words(chunk_text)
+            words = clean_text_to_words(chunk)
             global_vocab_set.update(words)
             all_chunks.append({"text": chunk, "location": location})
     except Exception as e:
