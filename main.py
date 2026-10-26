@@ -56,7 +56,7 @@ def main():
 
         query_vector = paragraph_to_vector(query, global_vocab)
         best_match_idx = -1
-        highest_score = -1
+        highest_score = -1.0
 
         for idx, doc_vector in enumerate(document_matrix):
             sim_score = cosine_similarity(query_vector, doc_vector)
@@ -65,7 +65,7 @@ def main():
                 highest_score = sim_score
                 best_match_idx = idx
 
-        if highest_score > 0.5:
+        if highest_score > 0.10:
             matched_chunk = all_chunks[best_match_idx]
             
             print(f"Location: {matched_chunk['location']} (similarity score: {highest_score:.4f})")
@@ -75,5 +75,5 @@ def main():
         else:
             print("No relevant matches found for your query.")
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
