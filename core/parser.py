@@ -1,59 +1,62 @@
-import zipfile
-import xml.etree.ElementTree as ET
+import os
+from pypdf import PdfReader
+from docx import Document
+from pptx import Presentation
+import openpyxl
 
-def extract_text_from_docx(docx_path):
+def stream_pdf(file_path):
+    reader = PdfReader(file_path)
+    for page_num, page in enumerate(reader.pages):
+        text = page.extract_text()
+        if text:
+            for p in text.split("\n\n"):
+                if len(p.strip()) > 20:
+                    yield (p.strip(), f"Page {page_num + 1}")
 
-    ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+def stream_docx(file_path):
+    
+    doc = Document(file_path)
+    for idx, paragraph in enumerate(doc.paragraphs):
+        text = paragraph.text.strip()
+        if len(text) > 20:
+            yield (text, f"Paragraph {idx + 1}")
 
-    with zipfile.ZipFile(docx_path) as docx_zip:
+def stream_pptx(file_path):
+    prs = Presentation(file_path)
+    for slide_idx, slide in enumerate(prs.slides):
+        for shape in slide.shapes:
+            if hasattr(shape, "text") and shape.text.strip():
+                text = shape.text.strip()
+                if len(text) > 20:
+                    yield (text, f"Slide {slide_idx + 1}")
 
-        xml_content = docx_zip.read('word/document.xml')
+def stream_excel(file_path):
+    wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+    for sheet_name in wb.sheetnames:
+        sheet = wb[sheet_name]
+        for row_idx, row in enumerate(sheet.iter_rows(values_only=True)):
+            
+            row_text = " ".join([str(cell) for cell in row if cell is not None]).strip()
+            if len(row_text) > 20:
+                yield (row_text, f"Sheet: {sheet_name}, Row {row_idx + 1}")
 
-    root = ET.fromstring(xml_content)
-
-    all_text = []
-
-    for p_tag in root.findall('.//w:p', ns):
-        text_pieces = []
-        for t_tag in p_tag.findall('.//w:t', ns):
-            if t_tag.text:
-                text_pieces.append(t_tag.text)
-
-        full_text = "".join(text_pieces)
-        if full_text.strip():  # Only add non-empty all_text
-            all_text.append(full_text)
-
-    return "\n".join(all_text)
-
-def extract_text_from_pptx(file_path):
-    ns = {'a': 'http://openxmlformats.org',
-          'p': 'http://openxmlformats.org'}
-    all_text = []
-    with zipfile.ZipFile(file_path, 'r') as pptx_zip:
-        slide_files = [f for f in pptx_zip.namelist() if f.startswith('ppt/slides/slide')]
-        for slide_file in sorted(slide_files):
-            xml_content = pptx_zip.read(slide_file)
-            root = ET.fromstring(xml_content)
-            for t_tag in root.findall('.//a:t', ns):
-                if t_tag.text:
-                    all_text.append(t_tag.text)
-    return "\n".join(all_text)
-
-
-# test running code
-
-if __name__ == "__main__":
-    print("Running test code for extract_text_from_docx function...")
-
-    try :
-        docx_text = extract_text_from_docx("datasets/test.docx")
-        print(docx_text)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-    print("\n --test pptx scratch parser   --")
-    try:
-        pptx_text = extract_text_from_pptx("datasets/test.pptx")
-        print(pptx_text)
-    except Exception as e:
-        print(f"An error occurred: {e}")
+def stream_any_document(file_path):
+    """
+    Main Manager Function: Ye automatic extension detect karke 
+    bina memory crash kiye chunks yield karega.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+        
+    ext = file_path.split('.')[-1].lower()
+    
+    if ext == 'pdf':
+        yield from stream_pdf(file_path)
+    elif ext in ['docx', 'doc']:
+        yield from stream_docx(file_path)
+    elif ext in ['pptx', 'ppt']:
+        yield from stream_pptx(file_path)
+    elif ext in ['xlsx', 'xls']:
+        yield from stream_excel(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: .{ext}")
