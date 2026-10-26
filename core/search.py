@@ -5,7 +5,7 @@ from core.vectorizer import paragraph_to_vector, cosine_similarity
 
 def search_query(query, global_vocab, document_matrix, all_paragraphs):
     query_vector = paragraph_to_vector(query, global_vocab)
-    best_matches = -1
+    best_matches_index = -1
     highest_score = -1.0
 
     for index, doc_vector in enumerate(document_matrix):
