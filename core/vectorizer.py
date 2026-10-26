@@ -1,11 +1,14 @@
 import os
 import math
 
-def clean_text_to_words(text):
-    word = text.split()
-    cleaned_words = [w.strip(".,!?\"'()[]:;").lower() for w in word]
-    return cleaned_words
 
+def clean_text_to_words(text):
+    text_normalized = text.replace("’s", "").replace("'s", "").replace("’", "").replace("'", "")
+    
+    word = text_normalized.split()
+    cleaned_words = [w.strip(".,!?\"()[]:;-–—").lower() for w in word]
+
+    return [w for w in cleaned_words if len(w) > 0]
 
 def compute_idf(all_chunks, global_vocab):
     """

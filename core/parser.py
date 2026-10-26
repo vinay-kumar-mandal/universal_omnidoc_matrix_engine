@@ -13,13 +13,20 @@ def stream_pdf(file_path):
                 if len(p.strip()) > 20:
                     yield (p.strip(), f"Page {page_num + 1}")
 
+
 def stream_docx(file_path):
-    
     doc = Document(file_path)
-    for idx, paragraph in enumerate(doc.paragraphs):
+    idx = 1
+    for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
         if len(text) > 20:
-            yield (text, f"Paragraph {idx + 1}")
+            sentences = text.split('. ')
+            for sentence in sentences:
+                s_clean = sentence.strip()
+                if len(s_clean) > 15:
+                    yield (s_clean, f"Paragraph {idx}")
+            idx += 1
+
 
 def stream_pptx(file_path):
     prs = Presentation(file_path)
