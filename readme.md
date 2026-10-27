@@ -2,6 +2,10 @@
 
 A lightweight, memory-efficient Document Search Engine built from scratch using pure mathematics and Python. It processes multiple document formats on a sentence level and uses Vector Space Modeling for text retrieval.
 
+<p align="center">
+  <img src="assets/mathematical_foundations.png" width="800" alt="OmniDoc Mathematical Foundations">
+</p>
+
 ## Features
 - **Universal Streaming Parser:** Lazy-loads content from PDF, DOCX, PPTX, and XLSX formats without loading the entire file into RAM, preventing memory crashes.
 - **Mathematical Core:** Implements custom TF-IDF (Term Frequency-Inverse Document Frequency) vectorization without external machine learning libraries.
