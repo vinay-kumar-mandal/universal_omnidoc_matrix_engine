@@ -1,2 +1,7 @@
 .venv
 /venv
+# Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
